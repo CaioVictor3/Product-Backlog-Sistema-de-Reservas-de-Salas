@@ -50,15 +50,6 @@
         .reservation-card {
             border-left: 4px solid #28a745;
         }
-        .reservation-card.pending {
-            border-left-color: #ffc107;
-        }
-        .reservation-card.cancelled {
-            border-left-color: #dc3545;
-        }
-        .status-badge {
-            font-size: 0.875rem;
-        }
         .no-reservations {
             text-align: center;
             padding: 3rem;
@@ -115,12 +106,6 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="new-reservation-tab" data-bs-toggle="tab" data-bs-target="#new-reservation" type="button" role="tab">
-                    <i class="bi bi-plus-circle me-2"></i>
-                    Nova Reserva
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="my-reservations-tab" data-bs-toggle="tab" data-bs-target="#my-reservations" type="button" role="tab">
                     <i class="bi bi-list-ul me-2"></i>
                     Minhas Reservas
@@ -168,105 +153,6 @@
                 </div>
             </div>
 
-            <!-- New Reservation Tab -->
-            <div class="tab-pane fade" id="new-reservation" role="tabpanel">
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-calendar-plus me-2"></i>
-                                    Fazer Nova Reserva
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <form id="reservationForm">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="roomSelect" class="form-label">
-                                                <i class="bi bi-door-open me-1"></i>
-                                                Sala
-                                            </label>
-                                            <select class="form-select" id="roomSelect" required>
-                                                <option value="">Selecione uma sala</option>
-                                            </select>
-                                            <div id="roomInfo" class="room-info" style="display: none;">
-                                                <small class="text-muted" id="roomDetails"></small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="reservationDate" class="form-label">
-                                                <i class="bi bi-calendar3 me-1"></i>
-                                                Data
-                                            </label>
-                                            <input type="date" class="form-control" id="reservationDate" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="startTime" class="form-label">
-                                                <i class="bi bi-clock me-1"></i>
-                                                Horário de Início
-                                            </label>
-                                            <input type="time" class="form-control" id="startTime" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="endTime" class="form-label">
-                                                <i class="bi bi-clock-fill me-1"></i>
-                                                Horário de Término
-                                            </label>
-                                            <input type="time" class="form-control" id="endTime" required>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="reservationPurpose" class="form-label">
-                                            <i class="bi bi-chat-text me-1"></i>
-                                            Finalidade da Reserva
-                                        </label>
-                                        <textarea class="form-control" id="reservationPurpose" rows="3" placeholder="Descreva brevemente o motivo da reserva..."></textarea>
-                                    </div>
-                                    <div class="d-grid">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="bi bi-check-circle me-2"></i>
-                                            Fazer Reserva
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    Informações Importantes
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled mb-0">
-                                    <li class="mb-2">
-                                        <i class="bi bi-clock text-primary me-2"></i>
-                                        <small>Reservas devem ser feitas com pelo menos 1 hora de antecedência</small>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-calendar text-primary me-2"></i>
-                                        <small>Máximo de 4 horas por reserva</small>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-person text-primary me-2"></i>
-                                        <small>Reservas são limitadas a 1 por dia por aluno</small>
-                                    </li>
-                                    <li class="mb-0">
-                                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-                                        <small>Reservas não utilizadas serão canceladas automaticamente</small>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- My Reservations Tab -->
             <div class="tab-pane fade" id="my-reservations" role="tabpanel">
@@ -384,11 +270,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeData();
             checkStudentAuth();
-            loadRooms();
             setupDateFilter();
             loadAvailableRooms();
             loadMyReservations();
-            setupFormValidation();
             setupRoomReservation();
         });
 
@@ -426,7 +310,6 @@
                     date: '2024-01-15', 
                     startTime: '08:00', 
                     endTime: '10:00',
-                    status: 'confirmed',
                     purpose: 'Estudo em grupo',
                     createdAt: '2024-01-10T10:30:00Z'
                 },
@@ -437,7 +320,6 @@
                     date: '2024-01-16', 
                     startTime: '14:00', 
                     endTime: '16:00',
-                    status: 'confirmed',
                     purpose: 'Projeto de programação',
                     createdAt: '2024-01-11T09:15:00Z'
                 },
@@ -448,7 +330,6 @@
                     date: '2024-01-17', 
                     startTime: '19:00', 
                     endTime: '21:00',
-                    status: 'pending',
                     purpose: 'Apresentação de trabalho',
                     createdAt: '2024-01-12T14:20:00Z'
                 },
@@ -459,7 +340,6 @@
                     date: '2024-01-18', 
                     startTime: '10:00', 
                     endTime: '12:00',
-                    status: 'confirmed',
                     purpose: 'Reunião de grupo',
                     createdAt: '2024-01-13T11:45:00Z'
                 },
@@ -470,7 +350,6 @@
                     date: '2024-01-19', 
                     startTime: '15:00', 
                     endTime: '17:00',
-                    status: 'cancelled',
                     purpose: 'Estudo individual',
                     createdAt: '2024-01-14T08:30:00Z'
                 }
@@ -500,7 +379,9 @@
         // Setup date filter
         function setupDateFilter() {
             const dateFilter = document.getElementById('dateFilter');
-            const today = new Date().toISOString().split('T')[0];
+            
+            // Get today's date in GMT-3 timezone
+            const today = getTodayInGMTMinus3();
             
             // Set today as default
             dateFilter.value = today;
@@ -510,6 +391,13 @@
             dateFilter.addEventListener('change', function() {
                 loadAvailableRooms();
             });
+        }
+
+        // Get today's date in GMT-3 timezone
+        function getTodayInGMTMinus3() {
+            const now = new Date();
+            const gmtMinus3 = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+            return gmtMinus3.toISOString().split('T')[0];
         }
 
         // Load and display available rooms
@@ -527,8 +415,7 @@
             const roomsWithStatus = rooms.map(room => {
                 const roomReservations = reservations.filter(reservation => 
                     reservation.roomId === room.id && 
-                    reservation.date === selectedDate && 
-                    reservation.status === 'confirmed'
+                    reservation.date === selectedDate
                 );
                 
                 const availableSlots = getAvailableTimeSlots(timeSlots, roomReservations);
@@ -545,10 +432,10 @@
             renderAvailableRooms(roomsWithStatus);
         }
 
-        // Generate time slots from 8:00 to 18:00
+        // Generate time slots for 24 hours (00:00 to 23:00)
         function generateTimeSlots() {
             const slots = [];
-            for (let hour = 8; hour < 18; hour++) {
+            for (let hour = 0; hour < 24; hour++) {
                 const startTime = `${hour.toString().padStart(2, '0')}:00`;
                 const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
                 slots.push({
@@ -618,7 +505,7 @@
                                         ${room.status === 'livre' ? 
                                             `<div class="mt-1">
                                                 ${room.availableSlots.slice(0, 3).map(slot => 
-                                                    `<span class="badge bg-light text-dark me-1 mb-1">${slot.label}</span>`
+                                                    `<span class="badge bg-light text-dark me-1 mb-1">${slot.start.split(':')[0]}h-${slot.end.split(':')[0]}h</span>`
                                                 ).join('')}
                                                 ${room.availableSlots.length > 3 ? `<small class="text-muted">+${room.availableSlots.length - 3} mais</small>` : ''}
                                             </div>` : 
@@ -685,8 +572,7 @@
 
             const roomReservations = reservations.filter(reservation => 
                 reservation.roomId === roomId && 
-                reservation.date === selectedDate && 
-                reservation.status === 'confirmed'
+                reservation.date === selectedDate
             );
             
             const availableSlots = getAvailableTimeSlots(timeSlots, roomReservations);
@@ -700,7 +586,7 @@
             };
         }
 
-        // Fill time selectors with available slots
+        // Fill time selectors with available slots (hours only)
         function fillTimeSelectors(availableSlots) {
             const startTimeSelect = document.getElementById('modalStartTime');
             const endTimeSelect = document.getElementById('modalEndTime');
@@ -709,11 +595,11 @@
             startTimeSelect.innerHTML = '<option value="">Selecione o horário</option>';
             endTimeSelect.innerHTML = '<option value="">Selecione o horário</option>';
             
-            // Add available slots to start time
+            // Add available slots to start time (only hours)
             availableSlots.forEach(slot => {
                 const option = document.createElement('option');
                 option.value = slot.start;
-                option.textContent = slot.label;
+                option.textContent = `${slot.start.split(':')[0]}h`;
                 startTimeSelect.appendChild(option);
             });
             
@@ -734,12 +620,12 @@
             const startIndex = availableSlots.findIndex(slot => slot.start === startTime);
             if (startIndex === -1) return;
             
-            // Add consecutive slots as end time options
+            // Add consecutive slots as end time options (only hours)
             for (let i = startIndex; i < availableSlots.length; i++) {
                 const slot = availableSlots[i];
                 const option = document.createElement('option');
                 option.value = slot.end;
-                option.textContent = slot.label;
+                option.textContent = `${slot.end.split(':')[0]}h`;
                 endTimeSelect.appendChild(option);
             }
         }
@@ -780,7 +666,6 @@
                 date: selectedDate,
                 startTime: startTime,
                 endTime: endTime,
-                status: 'pending',
                 purpose: purpose || 'Sem descrição',
                 createdAt: new Date().toISOString()
             };
@@ -793,8 +678,11 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('reservationModal'));
             modal.hide();
             
+            // Clear the purpose field
+            document.getElementById('modalPurpose').value = '';
+            
             // Show success message
-            showAlert('Reserva criada com sucesso! Aguarde aprovação do administrador.', 'success');
+            showAlert('Reserva criada com sucesso!', 'success');
             
             // Refresh available rooms and my reservations
             loadAvailableRooms();
@@ -808,8 +696,7 @@
             // Check if student already has a reservation for this date
             const existingReservation = reservations.find(r => 
                 r.studentId === currentStudent.id && 
-                r.date === date && 
-                r.status !== 'cancelled'
+                r.date === date
             );
             
             if (existingReservation) {
@@ -821,7 +708,6 @@
             const conflictingReservation = reservations.find(r => 
                 r.roomId === roomId && 
                 r.date === date && 
-                r.status !== 'cancelled' &&
                 ((startTime >= r.startTime && startTime < r.endTime) ||
                  (endTime > r.startTime && endTime <= r.endTime) ||
                  (startTime <= r.startTime && endTime >= r.endTime))
@@ -832,10 +718,11 @@
                 return false;
             }
             
-            // Check if reservation is at least 1 hour in advance
+            // Check if reservation is at least 1 hour in advance (GMT-3)
             const now = new Date();
+            const gmtMinus3Now = new Date(now.getTime() - (3 * 60 * 60 * 1000));
             const reservationDateTime = new Date(`${date}T${startTime}`);
-            const diffHours = (reservationDateTime - now) / (1000 * 60 * 60);
+            const diffHours = (reservationDateTime - gmtMinus3Now) / (1000 * 60 * 60);
             
             if (diffHours < 1) {
                 alert('Reservas devem ser feitas com pelo menos 1 hora de antecedência.');
@@ -865,127 +752,6 @@
             }, 3000);
         }
 
-        // Load rooms for selection
-        function loadRooms() {
-            const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-            const roomSelect = document.getElementById('roomSelect');
-            
-            roomSelect.innerHTML = '<option value="">Selecione uma sala</option>';
-            
-            rooms.forEach(room => {
-                const option = document.createElement('option');
-                option.value = room.id;
-                option.textContent = `${room.name} - ${room.location}`;
-                roomSelect.appendChild(option);
-            });
-        }
-
-        // Setup form validation and room info display
-        function setupFormValidation() {
-            const roomSelect = document.getElementById('roomSelect');
-            const roomInfo = document.getElementById('roomInfo');
-            const roomDetails = document.getElementById('roomDetails');
-            const reservationDate = document.getElementById('reservationDate');
-            const startTime = document.getElementById('startTime');
-            const endTime = document.getElementById('endTime');
-
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            reservationDate.min = today;
-
-            // Show room info when selected
-            roomSelect.addEventListener('change', function() {
-                if (this.value) {
-                    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-                    const selectedRoom = rooms.find(room => room.id == this.value);
-                    
-                    if (selectedRoom) {
-                        roomDetails.textContent = `Capacidade: ${selectedRoom.capacity} pessoas | Local: ${selectedRoom.location}`;
-                        roomInfo.style.display = 'block';
-                    }
-                } else {
-                    roomInfo.style.display = 'none';
-                }
-            });
-
-            // Validate time range
-            startTime.addEventListener('change', function() {
-                if (this.value && endTime.value) {
-                    validateTimeRange();
-                }
-            });
-
-            endTime.addEventListener('change', function() {
-                if (this.value && startTime.value) {
-                    validateTimeRange();
-                }
-            });
-        }
-
-        // Validate time range
-        function validateTimeRange() {
-            const startTime = document.getElementById('startTime').value;
-            const endTime = document.getElementById('endTime').value;
-            
-            if (startTime && endTime) {
-                const start = new Date(`2000-01-01T${startTime}`);
-                const end = new Date(`2000-01-01T${endTime}`);
-                const diffHours = (end - start) / (1000 * 60 * 60);
-                
-                if (diffHours <= 0) {
-                    alert('O horário de término deve ser posterior ao horário de início.');
-                    document.getElementById('endTime').value = '';
-                } else if (diffHours > 4) {
-                    alert('A reserva não pode exceder 4 horas.');
-                    document.getElementById('endTime').value = '';
-                }
-            }
-        }
-
-        // Handle reservation form submission
-        document.getElementById('reservationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const roomId = parseInt(document.getElementById('roomSelect').value);
-            const date = document.getElementById('reservationDate').value;
-            const startTime = document.getElementById('startTime').value;
-            const endTime = document.getElementById('endTime').value;
-            const purpose = document.getElementById('reservationPurpose').value;
-
-            // Validate reservation
-            if (!validateReservation(roomId, date, startTime, endTime)) {
-                return;
-            }
-
-            // Create new reservation
-            const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-            const newReservation = {
-                id: reservations.length > 0 ? Math.max(...reservations.map(r => r.id)) + 1 : 1,
-                studentId: currentStudent.id,
-                roomId: roomId,
-                date: date,
-                startTime: startTime,
-                endTime: endTime,
-                status: 'pending',
-                purpose: purpose || 'Sem descrição',
-                createdAt: new Date().toISOString()
-            };
-
-            // Add to reservations
-            reservations.push(newReservation);
-            localStorage.setItem('reservations', JSON.stringify(reservations));
-
-            // Show success message
-            showSuccessMessage('Reserva criada com sucesso! Aguarde aprovação do administrador.');
-
-            // Reset form
-            document.getElementById('reservationForm').reset();
-            document.getElementById('roomInfo').style.display = 'none';
-
-            // Switch to my reservations tab
-            document.getElementById('my-reservations-tab').click();
-            loadMyReservations();
-        });
 
         // Validate reservation
         function validateReservation(roomId, date, startTime, endTime) {
@@ -994,8 +760,7 @@
             // Check if student already has a reservation for this date
             const existingReservation = reservations.find(r => 
                 r.studentId === currentStudent.id && 
-                r.date === date && 
-                r.status !== 'cancelled'
+                r.date === date
             );
             
             if (existingReservation) {
@@ -1007,7 +772,6 @@
             const conflictingReservation = reservations.find(r => 
                 r.roomId === roomId && 
                 r.date === date && 
-                r.status !== 'cancelled' &&
                 ((startTime >= r.startTime && startTime < r.endTime) ||
                  (endTime > r.startTime && endTime <= r.endTime) ||
                  (startTime <= r.startTime && endTime >= r.endTime))
@@ -1018,10 +782,11 @@
                 return false;
             }
 
-            // Check if reservation is at least 1 hour in advance
+            // Check if reservation is at least 1 hour in advance (GMT-3)
             const now = new Date();
+            const gmtMinus3Now = new Date(now.getTime() - (3 * 60 * 60 * 1000));
             const reservationDateTime = new Date(`${date}T${startTime}`);
-            const diffHours = (reservationDateTime - now) / (1000 * 60 * 60);
+            const diffHours = (reservationDateTime - gmtMinus3Now) / (1000 * 60 * 60);
             
             if (diffHours < 1) {
                 alert('Reservas devem ser feitas com pelo menos 1 hora de antecedência.');
@@ -1057,14 +822,12 @@
             
             reservationsList.innerHTML = sortedReservations.map(reservation => {
                 const room = rooms.find(room => room.id === reservation.roomId);
-                const statusClass = getStatusClass(reservation.status);
-                const statusText = getStatusText(reservation.status);
                 
                 return `
-                    <div class="card reservation-card ${reservation.status} mb-3">
+                    <div class="card reservation-card mb-3">
                         <div class="card-body">
                             <div class="row align-items-center">
-                                <div class="col-md-8">
+                                <div class="col-md-10">
                                     <h6 class="card-title mb-1">
                                         <i class="bi bi-door-open me-2"></i>
                                         ${room ? room.name : 'Sala não encontrada'}
@@ -1081,11 +844,7 @@
                                     </p>
                                     ${reservation.purpose ? `<p class="card-text text-muted mb-0"><i class="bi bi-chat-text me-1"></i>${reservation.purpose}</p>` : ''}
                                 </div>
-                                <div class="col-md-4 text-end">
-                                    <span class="badge ${statusClass} status-badge mb-2">
-                                        ${statusText}
-                                    </span>
-                                    <br>
+                                <div class="col-md-2 text-end">
                                     <small class="text-muted">
                                         <i class="bi bi-clock me-1"></i>
                                         Criada em ${formatDateTime(reservation.createdAt)}
@@ -1098,33 +857,6 @@
             }).join('');
         }
 
-        // Get status CSS class
-        function getStatusClass(status) {
-            switch (status) {
-                case 'confirmed':
-                    return 'bg-success';
-                case 'pending':
-                    return 'bg-warning text-dark';
-                case 'cancelled':
-                    return 'bg-danger';
-                default:
-                    return 'bg-secondary';
-            }
-        }
-
-        // Get status text
-        function getStatusText(status) {
-            switch (status) {
-                case 'confirmed':
-                    return 'Confirmada';
-                case 'pending':
-                    return 'Pendente';
-                case 'cancelled':
-                    return 'Cancelada';
-                default:
-                    return 'Desconhecido';
-            }
-        }
 
         // Format date to Brazilian format
         function formatDate(dateString) {
@@ -1138,20 +870,6 @@
             return date.toLocaleString('pt-BR');
         }
 
-        // Show success message
-        function showSuccessMessage(message) {
-            const button = document.querySelector('#reservationForm button[type="submit"]');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="bi bi-check-circle me-2"></i>Reserva Criada!';
-            button.classList.add('btn-success');
-            button.classList.remove('btn-primary');
-            
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.classList.remove('btn-success');
-                button.classList.add('btn-primary');
-            }, 3000);
-        }
 
         // Logout function
         function logout() {
