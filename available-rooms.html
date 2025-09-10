@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reserva de Salas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-livre {
+            color: #28a745;
+        }
+        .status-ocupada {
+            color: #dc3545;
+        }
+        .card-sala {
+            transition: transform 0.2s;
+        }
+        .card-sala:hover {
+            transform: translateY(-2px);
+        }
+        .btn-reservar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .main-container {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .navbar-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="login-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card login-card">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-door-open fa-3x text-primary mb-3"></i>
+                                <h3 class="card-title">Sistema de Reserva de Salas</h3>
+                                <p class="text-muted">Faça login para continuar</p>
+                            </div>
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Senha</label>
+                                    <input type="password" class="form-control" id="password" required>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+                                </div>
+                            </form>
+                            <div id="loginError" class="alert alert-danger mt-3 hidden" role="alert">
+                                Email ou senha incorretos!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela Principal -->
+    <div id="mainScreen" class="main-container hidden">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-door-open me-2"></i>
+                    Sistema de Reserva de Salas
+                </a>
+                <div class="navbar-nav ms-auto">
+                    <span class="navbar-text me-3">
+                        <i class="fas fa-user me-1"></i>
+                        <span id="userEmail">caio.victor@gmail.com</span>
+                    </span>
+                    <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        Sair
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Conteúdo Principal -->
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-list me-2"></i>Lista de Salas</h2>
+                        <div class="d-flex align-items-center">
+                            <span class="me-3">
+                                <i class="fas fa-check-circle text-success me-1"></i>
+                                <span id="livresCount">0</span> Livres
+                            </span>
+                            <span>
+                                <i class="fas fa-times-circle text-danger me-1"></i>
+                                <span id="ocupadasCount">0</span> Ocupadas
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Salas -->
+                    <div id="salasContainer" class="row">
+                        <!-- As salas serão carregadas dinamicamente aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Reserva -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Reserva</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja reservar a <strong id="modalSalaNome"></strong>?</p>
+                    <p class="text-muted">Horário: <span id="modalSalaHorario"></span></p>
+                    <p class="text-muted">Capacidade: <span id="modalSalaCapacidade"></span> pessoas</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmReserva">Confirmar Reserva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Estado da aplicação
+        const state = {
+            isLoggedIn: false,
+            currentUser: null,
+            salas: [
+                { 
+                    id: 1,
+                    nome: "Sala 101", 
+                    capacidade: 30, 
+                    status: "livre", 
+                    horario: "08:00 - 10:00" 
+                },
+                { 
+                    id: 2,
+                    nome: "Sala 202", 
+                    capacidade: 20, 
+                    status: "ocupada", 
+                    horario: "10:00 - 12:00" 
+                },
+                { 
+                    id: 3,
+                    nome: "Laboratório de Informática", 
+                    capacidade: 40, 
+                    status: "livre", 
+                    horario: "14:00 - 16:00" 
+                }
+            ],
+            salaParaReservar: null
+        };
+
+        // Dados do usuário fixo
+        const USER_DATA = {
+            email: "caio.victor@gmail.com",
+            password: "123"
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Verificar se já está logado
+            const savedState = localStorage.getItem('salaReservaState');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                if (parsedState.isLoggedIn) {
+                    state.isLoggedIn = true;
+                    state.currentUser = parsedState.currentUser;
+                    state.salas = parsedState.salas || state.salas;
+                    showMainScreen();
+                }
+            }
+
+            // Event listeners
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('confirmReserva').addEventListener('click', confirmarReserva);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (email === USER_DATA.email && password === USER_DATA.password) {
+                // Login bem-sucedido
+                state.isLoggedIn = true;
+                state.currentUser = { email: email };
+                
+                // Salvar estado no localStorage
+                saveState();
+                
+                // Esconder erro se existir
+                errorDiv.classList.add('hidden');
+                
+                // Mostrar tela principal
+                showMainScreen();
+            } else {
+                // Login falhou
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function showMainScreen() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = state.currentUser.email;
+            renderSalas();
+        }
+
+        function renderSalas() {
+            const container = document.getElementById('salasContainer');
+            const livresCount = state.salas.filter(sala => sala.status === 'livre').length;
+            const ocupadasCount = state.salas.filter(sala => sala.status === 'ocupada').length;
+
+            // Atualizar contadores
+            document.getElementById('livresCount').textContent = livresCount;
+            document.getElementById('ocupadasCount').textContent = ocupadasCount;
+
+            // Renderizar salas
+            container.innerHTML = state.salas.map(sala => `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card card-sala h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0">${sala.nome}</h5>
+                                <span class="badge ${sala.status === 'livre' ? 'bg-success' : 'bg-danger'}">
+                                    <i class="fas ${sala.status === 'livre' ? 'fa-check' : 'fa-times'} me-1"></i>
+                                    ${sala.status === 'livre' ? 'Livre' : 'Ocupada'}
+                                </span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-users text-muted me-2"></i>
+                                    <span>Capacidade: ${sala.capacidade} pessoas</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clock text-muted me-2"></i>
+                                    <span>Horário: ${sala.horario}</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto">
+                                <button 
+                                    class="btn ${sala.status === 'livre' ? 'btn-primary' : 'btn-secondary'} btn-reservar w-100"
+                                    ${sala.status === 'ocupada' ? 'disabled' : ''}
+                                    onclick="abrirModalReserva(${sala.id})"
+                                >
+                                    <i class="fas ${sala.status === 'livre' ? 'fa-calendar-plus' : 'fa-ban'} me-1"></i>
+                                    ${sala.status === 'livre' ? 'Reservar' : 'Indisponível'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function abrirModalReserva(salaId) {
+            const sala = state.salas.find(s => s.id === salaId);
+            if (!sala || sala.status !== 'livre') return;
+
+            state.salaParaReservar = sala;
+            
+            document.getElementById('modalSalaNome').textContent = sala.nome;
+            document.getElementById('modalSalaHorario').textContent = sala.horario;
+            document.getElementById('modalSalaCapacidade').textContent = sala.capacidade;
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        function confirmarReserva() {
+            if (!state.salaParaReservar) return;
+
+            // Atualizar status da sala
+            const salaIndex = state.salas.findIndex(s => s.id === state.salaParaReservar.id);
+            if (salaIndex !== -1) {
+                state.salas[salaIndex].status = 'ocupada';
+                
+                // Salvar estado
+                saveState();
+                
+                // Re-renderizar salas
+                renderSalas();
+                
+                // Fechar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+                modal.hide();
+                
+                // Mostrar mensagem de sucesso
+                showAlert('Reserva realizada com sucesso!', 'success');
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Remover automaticamente após 3 segundos
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 3000);
+        }
+
+        function logout() {
+            state.isLoggedIn = false;
+            state.currentUser = null;
+            
+            // Limpar localStorage
+            localStorage.removeItem('salaReservaState');
+            
+            // Mostrar tela de login
+            document.getElementById('mainScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            
+            // Limpar formulário
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        function saveState() {
+            localStorage.setItem('salaReservaState', JSON.stringify({
+                isLoggedIn: state.isLoggedIn,
+                currentUser: state.currentUser,
+                salas: state.salas
+            }));
+        }
+    </script>
+</body>
+</html>
