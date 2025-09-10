@@ -455,9 +455,8 @@
                     const resEnd = reservation.endTime;
                     
                     // Check if slot conflicts with reservation
-                    return (slot.start >= resStart && slot.start < resEnd) ||
-                           (slot.end > resStart && slot.end <= resEnd) ||
-                           (slot.start <= resStart && slot.end >= resEnd);
+                    // Slot is available if it doesn't overlap with any reservation
+                    return (slot.start < resEnd && slot.end > resStart);
                 });
             });
         }
@@ -554,6 +553,11 @@
             document.getElementById('modalSalaCapacidade').textContent = room.capacity;
             document.getElementById('modalSalaData').textContent = formatDate(selectedDate);
 
+            // Clear previous selections
+            document.getElementById('modalStartTime').value = '';
+            document.getElementById('modalEndTime').value = '';
+            document.getElementById('modalPurpose').value = '';
+
             // Fill time selectors with available slots
             fillTimeSelectors(roomWithSlots.availableSlots);
             
@@ -570,11 +574,13 @@
             const room = rooms.find(r => r.id === roomId);
             if (!room) return null;
 
+            // Filter reservations for this room and date
             const roomReservations = reservations.filter(reservation => 
                 reservation.roomId === roomId && 
                 reservation.date === selectedDate
             );
             
+            // Get available time slots (remove reserved intervals)
             const availableSlots = getAvailableTimeSlots(timeSlots, roomReservations);
             const isFullyOccupied = availableSlots.length === 0;
             
@@ -595,16 +601,20 @@
             startTimeSelect.innerHTML = '<option value="">Selecione o horário</option>';
             endTimeSelect.innerHTML = '<option value="">Selecione o horário</option>';
             
+            // Remove any existing event listeners
+            startTimeSelect.replaceWith(startTimeSelect.cloneNode(true));
+            const newStartTimeSelect = document.getElementById('modalStartTime');
+            
             // Add available slots to start time (only hours)
             availableSlots.forEach(slot => {
                 const option = document.createElement('option');
                 option.value = slot.start;
                 option.textContent = `${slot.start.split(':')[0]}h`;
-                startTimeSelect.appendChild(option);
+                newStartTimeSelect.appendChild(option);
             });
             
             // Add event listener for start time change
-            startTimeSelect.addEventListener('change', function() {
+            newStartTimeSelect.addEventListener('change', function() {
                 updateEndTimeOptions(this.value, availableSlots);
             });
         }
@@ -621,12 +631,20 @@
             if (startIndex === -1) return;
             
             // Add consecutive slots as end time options (only hours)
+            // Only show slots that are consecutive from the start time
             for (let i = startIndex; i < availableSlots.length; i++) {
                 const slot = availableSlots[i];
-                const option = document.createElement('option');
-                option.value = slot.end;
-                option.textContent = `${slot.end.split(':')[0]}h`;
-                endTimeSelect.appendChild(option);
+                
+                // Check if this slot is consecutive (starts where previous ended)
+                if (i === startIndex || slot.start === availableSlots[i-1].end) {
+                    const option = document.createElement('option');
+                    option.value = slot.end;
+                    option.textContent = `${slot.end.split(':')[0]}h`;
+                    endTimeSelect.appendChild(option);
+                } else {
+                    // If not consecutive, stop adding options
+                    break;
+                }
             }
         }
 
@@ -858,9 +876,9 @@
         }
 
 
-        // Format date to Brazilian format
+        // Format date to Brazilian format (GMT-3)
         function formatDate(dateString) {
-            const date = new Date(dateString);
+            const date = new Date(dateString + 'T00:00:00-03:00');
             return date.toLocaleDateString('pt-BR');
         }
 
