@@ -1,0 +1,62 @@
+.navbar-brand {
+    font-weight: bold;
+}
+.student-badge {
+    background: linear-gradient(45deg, #28a745, #20c997);
+}
+.btn-logout {
+    margin-left: auto;
+}
+.card {
+    border-radius: 0.75rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+.form-control, .form-select {
+    border-radius: 0.5rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+.btn-primary {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+.reservation-card {
+    border-left: 4px solid #28a745;
+}
+.no-reservations {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+.room-info {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+}
+.card-sala {
+    transition: transform 0.2s;
+}
+.card-sala:hover {
+    transform: translateY(-2px);
+}
+.btn-reservar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
