@@ -1,0 +1,38 @@
+.status-livre {
+    color: #28a745;
+}
+.status-ocupada {
+    color: #dc3545;
+}
+.card-sala {
+    transition: transform 0.2s;
+}
+.card-sala:hover {
+    transform: translateY(-2px);
+}
+.btn-reservar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.hidden {
+    display: none !important;
+}
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.login-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.main-container {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+.navbar-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
